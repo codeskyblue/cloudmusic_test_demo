@@ -4,6 +4,14 @@
 import uiautomator2 as u2
 import time
 import pytest
+import adbutils
+import allure
+import inspect
+
+
+def setup_function(fn):
+    source = inspect.getsource(fn)
+    allure.attach(source, "Source code", allure.attachment_type.TEXT)
 
 
 def test_login():
@@ -33,7 +41,11 @@ def d(device):
     _d.click(0.261, 0.96)
     _d(text="立即体验").click()
 
-    return _d
+    _adb = adbutils.adb.device(_d.serial)
+    v = _adb.screenrecord()
+    yield _d
+    v.stop_and_pull("v.mp4")
+    allure.attach.file("v.mp4")
 
 
 def test_每日歌曲(d: u2.Session):
